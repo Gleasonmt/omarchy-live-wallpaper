@@ -59,3 +59,7 @@ Add `live/<name>.frag.qsb` next to `backgrounds/<name>.png`: a Qt 6 fragment sha
 `detail` in the standard `qt_Matrix`/`qt_Opacity` block, plus `live/<name>.json`
 `{"still": <seconds>, "details": [[x0, y0, x1, y1], ...]}` listing the patches that
 move in Lite. The themes above include their shader source in `src/`.
+
+## License
+
+[MIT](LICENSE)
