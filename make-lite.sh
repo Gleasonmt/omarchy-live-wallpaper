@@ -21,22 +21,25 @@ for mode in "$themes"/*/live/mode.json; do
   [[ -e $mode ]] || continue
   dir=${mode%/live/mode.json}
   name=${dir##*/}
-  [[ $name == *-lite || -e $dir/$marker || -e $dir/.made-by-omarchy-themes ]] && continue
+  [[ $name == *-lite || -e $dir/$marker || -e $dir/.made-by-omarchy-themes || -L $dir/live ]] && continue
   grep -q '"details"' "$mode" && continue
   lite="$themes/$name-lite"
   if [[ -e $lite && ! -e $lite/$marker && ! -e $lite/.made-by-omarchy-themes ]]; then
     continue   # someone's own theme of that name: leave it alone
   fi
-  if [[ -e $lite/$marker ]] && [[ -z $(find -L "$dir" -path "$dir/.git" -prune -o -type f -newer "$lite/$marker" -print -quit 2>/dev/null) ]]; then
+  if [[ -e $lite/$marker ]] && [[ -z $(find "$dir" -path "$dir/.git" -prune -o -type f -newer "$lite/$marker" -print -quit 2>/dev/null) ]]; then
     continue   # up to date
   fi
   tmp="$themes/.$name-lite.tmp"
   rm -rf "$tmp"
   mkdir -p "$tmp"
-  find -L "$dir" -mindepth 1 -maxdepth 1 ! -name .git ! -name src ! -name media ! -name 'preview.*' ! -iname 'README*' ! -name LICENSE \
-    -exec cp -rL {} "$tmp/" \;
+  # symlinks are never followed or copied: a theme is someone else's files,
+  # and a link to / or ~ would copy the whole disk or private files in here
+  find "$dir" -mindepth 1 -maxdepth 1 ! -type l ! -name .git ! -name src ! -name media ! -name 'preview.*' ! -iname 'README*' ! -name LICENSE \
+    -exec cp -r --no-dereference {} "$tmp/" \;
+  find "$tmp" -type l -delete
   printf '{\n  "mode": "details"\n}\n' >"$tmp/live/mode.json"
-  preview=$(find -L "$dir" -maxdepth 1 -type f -iname 'preview.*' | sort | head -1)
+  preview=$(find "$dir" -maxdepth 1 -type f -iname 'preview.*' | sort | head -1)
   if [[ -n $preview ]]; then
     # preview.jpg, so "<name>-lite.jpg" sorts right after "<name>.jpg" in the picker
     magick "$preview" -resize 1800x1012^ -gravity center -extent 1800x1012 -gravity southeast \
