@@ -4,7 +4,7 @@
 #   make-lite.sh [themes-dir]     (default ~/.config/omarchy/themes)
 # For every theme whose live/mode.json isn't "details", <name>-lite is made
 # (or remade when the theme has changed since, e.g. after `omarchy theme
-# update`), without its .git, src or README, with live/mode.json set to
+# update`), without its .git, src, media or README, with live/mode.json set to
 # details and LITE on its preview. Lite copies whose theme is gone are
 # removed. Only folders carrying this script's marker are ever replaced or
 # removed. Run by the live-wallpaper plugin at startup and now and then.
@@ -33,7 +33,7 @@ for mode in "$themes"/*/live/mode.json; do
   tmp="$themes/.$name-lite.tmp"
   rm -rf "$tmp"
   mkdir -p "$tmp"
-  find -L "$dir" -mindepth 1 -maxdepth 1 ! -name .git ! -name src ! -name 'preview.*' ! -iname 'README*' ! -name LICENSE \
+  find -L "$dir" -mindepth 1 -maxdepth 1 ! -name .git ! -name src ! -name media ! -name 'preview.*' ! -iname 'README*' ! -name LICENSE \
     -exec cp -rL {} "$tmp/" \;
   printf '{\n  "mode": "details"\n}\n' >"$tmp/live/mode.json"
   preview=$(find -L "$dir" -maxdepth 1 -type f -iname 'preview.*' | sort | head -1)

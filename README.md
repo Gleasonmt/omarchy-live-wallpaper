@@ -8,6 +8,13 @@ wallpaper is `<theme>/backgrounds/<name>.*` and the theme has
 omarchy plugin add https://github.com/Gleasonmt/omarchy-live-wallpaper --enable
 ```
 
+| | |
+|---|---|
+| ![Light Grid](media/light-grid.webp) | ![Light Grid Towers](media/light-grid-towers.webp) |
+| [**Light Grid**](https://github.com/Gleasonmt/omarchy-light-grid-theme) | [**Light Grid Towers**](https://github.com/Gleasonmt/omarchy-light-grid-towers-theme) |
+| ![Topside](media/topside.webp) | ![Topside Outpost](media/topside-outpost.webp) |
+| [**Topside**](https://github.com/Gleasonmt/omarchy-topside-theme) | [**Topside Outpost**](https://github.com/Gleasonmt/omarchy-topside-outpost-theme) |
+
 Themes made for it:
 [Light Grid](https://github.com/Gleasonmt/omarchy-light-grid-theme) ·
 [Light Grid Towers](https://github.com/Gleasonmt/omarchy-light-grid-towers-theme) ·
