@@ -1,0 +1,40 @@
+#!/bin/bash
+# Choose how themes' live wallpapers animate (gleasonmt.live-wallpaper plugin).
+#   live-wallpaper                         # show the current settings
+#   live-wallpaper mode <theme|full|details|still>          # when plugged in
+#   live-wallpaper battery-mode <theme|full|details|still>  # on battery
+#   live-wallpaper fps <n> | battery-fps <n>          # frames per second (0 = hold still)
+#   live-wallpaper sharp <on|off> [--battery]         # Full mode at full resolution, or half
+# theme (default): as the theme says ("Topside" moves fully, "Topside Lite"
+# only in details). full: the whole scene moves. details: the still stays and
+# only small parts move (lights, cloth, beams), which costs less battery.
+# still: no animation.
+set -euo pipefail
+SETTINGS="$HOME/.config/omarchy/live-wallpaper.json"
+
+[[ -s $SETTINGS ]] || echo '{}' >"$SETTINGS"
+set_key() {  # set_key <key> <json value>
+  local tmp
+  tmp=$(mktemp "$SETTINGS.XXXXXX")
+  jq --arg k "$1" --argjson v "$2" '.[$k] = $v' "$SETTINGS" >"$tmp" && mv "$tmp" "$SETTINGS"
+}
+check_mode() { [[ $1 == theme || $1 == full || $1 == details || $1 == still ]] || { echo "mode must be theme, full, details or still" >&2; exit 1; }; }
+check_fps() { [[ $1 =~ ^[0-9]+$ ]] && (( $1 <= 60 )) || { echo "fps must be 0-60" >&2; exit 1; }; }
+
+case "${1:-}" in
+  "") jq -r 'def show($m; $fps; $scale): (if $m == "theme" then "theme'"'"'s choice" else $m end) + ", \($fps) fps"
+               + (if $m == "full" then ", " + (if $scale >= 1 then "full" else "reduced" end) + " resolution" else "" end);
+             "plugged in:  " + show(.mode // "theme"; .fps // 30; .renderScale // 1),
+             "on battery:  " + show(.batteryMode // "theme"; .batteryFps // 10; .batteryRenderScale // 0.5)' "$SETTINGS" ;;
+  mode) check_mode "${2:-}"; set_key mode "\"$2\"" ;;
+  battery-mode) check_mode "${2:-}"; set_key batteryMode "\"$2\"" ;;
+  fps) check_fps "${2:-}"; set_key fps "$2" ;;
+  battery-fps) check_fps "${2:-}"; set_key batteryFps "$2" ;;
+  sharp)
+    [[ ${2:-} == on || ${2:-} == off ]] || { echo "sharp takes on or off" >&2; exit 1; }
+    key=renderScale; [[ ${3:-} == --battery ]] && key=batteryRenderScale
+    set_key "$key" "$([[ $2 == on ]] && echo 1 || echo 0.5)" ;;
+  get) jq -r --arg k "${2:-}" --arg d "${3:-}" '.[$k] // $d' "$SETTINGS" ;;
+  -h|--help|help) sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "unknown command: $1 (try live-wallpaper --help)" >&2; exit 1 ;;
+esac

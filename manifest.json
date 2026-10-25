@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "gleasonmt.live-wallpaper",
+  "name": "Live wallpaper",
+  "version": "1.0.0",
+  "author": "Gleasonmt",
+  "description": "Animates a theme's wallpaper when the theme ships a live shader for it (<theme>/live/<name>.frag.qsb)",
+  "kinds": ["service"],
+  "entryPoints": { "service": "Service.qml" }
+}

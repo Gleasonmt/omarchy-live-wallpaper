@@ -1,0 +1,14 @@
+  // Live wallpaper: how themes' animated wallpapers move (~/.local/bin/live-wallpaper,
+  // plugin gleasonmt.live-wallpaper). Shown under Style. "Theme's choice" follows the
+  // theme picked ("Topside" moves fully, "Topside Lite" only in details).
+  "style.live": {"icon": "", "label": "Live Wallpaper", "description": "How animated theme wallpapers move"},
+  "style.live.ac": {"icon": "", "label": "Plugged in"},
+  "style.live.ac.theme": {"icon": "", "label": "Theme's choice", "description": "Full motion for \"Topside\", details for \"Topside Lite\"", "action": "live-wallpaper mode theme", "checked": "[ \"$(live-wallpaper get mode theme)\" = theme ]"},
+  "style.live.ac.full": {"icon": "", "label": "Full", "description": "The whole scene moves", "action": "live-wallpaper mode full", "checked": "[ \"$(live-wallpaper get mode theme)\" = full ]"},
+  "style.live.ac.details": {"icon": "", "label": "Details", "description": "Only small parts move: lights, cloth, beams. Uses less power", "action": "live-wallpaper mode details", "checked": "[ \"$(live-wallpaper get mode theme)\" = details ]"},
+  "style.live.ac.still": {"icon": "", "label": "Still", "description": "No animation", "action": "live-wallpaper mode still", "checked": "[ \"$(live-wallpaper get mode theme)\" = still ]"},
+  "style.live.battery": {"icon": "", "label": "On battery"},
+  "style.live.battery.theme": {"icon": "", "label": "Theme's choice", "description": "Full motion for \"Topside\", details for \"Topside Lite\"", "action": "live-wallpaper battery-mode theme", "checked": "[ \"$(live-wallpaper get batteryMode theme)\" = theme ]"},
+  "style.live.battery.full": {"icon": "", "label": "Full", "description": "The whole scene moves", "action": "live-wallpaper battery-mode full", "checked": "[ \"$(live-wallpaper get batteryMode theme)\" = full ]"},
+  "style.live.battery.details": {"icon": "", "label": "Details", "description": "Only small parts move: lights, cloth, beams. Uses less power", "action": "live-wallpaper battery-mode details", "checked": "[ \"$(live-wallpaper get batteryMode theme)\" = details ]"},
+  "style.live.battery.still": {"icon": "", "label": "Still", "description": "No animation", "action": "live-wallpaper battery-mode still", "checked": "[ \"$(live-wallpaper get batteryMode theme)\" = still ]"},
