@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
+import QtMultimedia
 
 // Live wallpapers. When the current background is <theme>/backgrounds/<name>.*
 // and the theme has <theme>/live/<name>.frag.qsb, that shader animates it.
@@ -36,6 +37,27 @@ Item {
   property real time: 0
   property string clockFor: ""   // the shader the clock was last started for
   property string shaderVersion: ""
+  // A painted scene animates its theme's own picture (backgrounds/<name>.png),
+  // which its shader samples as `source` ({"painted": true} in live/<name>.json).
+  // ("plate": "<file>" in live/ instead: a copy of the picture with what the
+  // scene draws itself, like moving vehicles, painted out.)
+  property bool painted: false
+  property string plate: ""
+  // More pictures for a scene, from live/ ("layers": ["a.png", ...]), sampled
+  // as layer1, layer2, ... (up to 4): parallax layers, or parts drawn on top.
+  property var layers: []
+  // A looping video for full motion ("video": "<file>" in live/), sampled as
+  // `video`: e.g. a character cut out of a green screen, colour and mask side
+  // by side. Decoded by the GPU; paused whenever the animation is.
+  property string video: ""
+  property var videoSize: [1048, 414]   // ("videoSize": [w, h]: the texture the shader samples)
+  readonly property string videoUrl: painted && shader && video ? "file://" + shader.replace(/\/[^\/]*$/, "/" + video) : ""
+  function layerUrl(i) {
+    return painted && shader && layers.length > i ? "file://" + shader.replace(/\/[^\/]*$/, "/" + layers[i]) + "?v=" + shaderVersion : ""
+  }
+  readonly property string paintingUrl: !painted || !shader ? ""
+    : plate && plate.indexOf("/") === -1 ? "file://" + shader.replace(/\/[^\/]*$/, "/" + plate) + "?v=" + shaderVersion
+    : "file://" + shader.replace(/\/live\/([^\/]*)\.frag\.qsb$/, "/backgrounds/$1.png") + "?v=" + shaderVersion
   // Qt caches a shader by its URL, so a rebuilt one at the same path would
   // keep showing the old version: the build time in the URL makes it new.
   readonly property string shaderUrl: shader ? "file://" + shader + "?v=" + shaderVersion : ""
@@ -123,6 +145,11 @@ Item {
       try {
         var info = JSON.parse(text())
         root.details = info.details || []
+        root.painted = info.painted === true
+        root.plate = String(info.plate || "")
+        root.videoSize = Array.isArray(info.videoSize) && info.videoSize.length === 2 ? info.videoSize.map(Number) : [1048, 414]
+        root.video = String(info.video || "").indexOf("/") === -1 ? String(info.video || "") : ""
+        root.layers = Array.isArray(info.layers) ? info.layers.map(String).filter(function(f) { return f.indexOf("/") === -1 }) : []
         if (root.clockFor !== root.shader) {   // only when the scene changes
           root.clockFor = root.shader
           root.time = Number(info.still) || 0
@@ -237,8 +264,30 @@ Item {
             property size resolution: Qt.size(Math.round(width * root.renderScale), Math.round(height * root.renderScale))
             property rect viewport: Qt.rect(0, 0, 1, 1)
             property real detail: 0
+            property var source: fullPainting
+            property var layer1: fullL1
+            property var layer2: fullL2
+            property var layer3: fullL3
+            property var layer4: fullL4
+            property var video: videoTexture
             fragmentShader: root.shaderUrl
           }
+          Image { id: fullL1; visible: false; source: root.layerUrl(0); asynchronous: true; smooth: true }
+          Image { id: fullL2; visible: false; source: root.layerUrl(1); asynchronous: true; smooth: true }
+          Image { id: fullL3; visible: false; source: root.layerUrl(2); asynchronous: true; smooth: true }
+          Image { id: fullL4; visible: false; source: root.layerUrl(3); asynchronous: true; smooth: true }
+          MediaPlayer {
+            id: player
+            source: root.videoUrl && root.mode === "full" ? root.videoUrl : ""
+            loops: MediaPlayer.Infinite
+            videoOutput: videoOut
+            readonly property bool wanted: source != "" && screenScope.animating && root.fps > 0
+            onWantedChanged: wanted ? play() : pause()
+            onSourceChanged: if (wanted) play()
+          }
+          VideoOutput { id: videoOut; width: root.videoSize[0]; height: root.videoSize[1]; fillMode: VideoOutput.Stretch }
+          ShaderEffectSource { id: videoTexture; sourceItem: videoOut; hideSource: true; live: true; visible: false }
+          Image { id: fullPainting; visible: false; source: root.paintingUrl; asynchronous: true; smooth: true; mipmap: true }
         }
       }
 
@@ -279,8 +328,19 @@ Item {
             property size resolution: Qt.size(patch.sw * dpr, patch.sh * dpr)
             property rect viewport: Qt.rect(patch.px / patch.sw, patch.py / patch.sh, patch.pw / patch.sw, patch.ph / patch.sh)
             property real detail: 1
+            property var source: patchPainting
+            property var layer1: patchL1
+            property var layer2: patchL2
+            property var layer3: patchL3
+            property var layer4: patchL4
+            property var video: patchL4
             fragmentShader: root.shaderUrl
           }
+          Image { id: patchL1; visible: false; source: root.layerUrl(0); asynchronous: true; smooth: true }
+          Image { id: patchL2; visible: false; source: root.layerUrl(1); asynchronous: true; smooth: true }
+          Image { id: patchL3; visible: false; source: root.layerUrl(2); asynchronous: true; smooth: true }
+          Image { id: patchL4; visible: false; source: root.layerUrl(3); asynchronous: true; smooth: true }
+          Image { id: patchPainting; visible: false; source: root.paintingUrl; asynchronous: true; smooth: true }
         }
       }
     }

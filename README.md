@@ -14,12 +14,15 @@ omarchy plugin add https://github.com/Gleasonmt/omarchy-live-wallpaper --enable
 | [**Light Grid**](https://github.com/Gleasonmt/omarchy-light-grid-theme) | [**Light Grid Towers**](https://github.com/Gleasonmt/omarchy-light-grid-towers-theme) |
 | ![Topside](media/topside.webp) | ![Topside Outpost](media/topside-outpost.webp) |
 | [**Topside**](https://github.com/Gleasonmt/omarchy-topside-theme) | [**Topside Outpost**](https://github.com/Gleasonmt/omarchy-topside-outpost-theme) |
+| ![Topside Mountain View](media/topside-mountain-view.webp) | |
+| [**Topside Mountain View**](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme) | |
 
 Themes made for it:
 [Light Grid](https://github.com/Gleasonmt/omarchy-light-grid-theme) ·
 [Light Grid Towers](https://github.com/Gleasonmt/omarchy-light-grid-towers-theme) ·
 [Topside](https://github.com/Gleasonmt/omarchy-topside-theme) ·
-[Topside Outpost](https://github.com/Gleasonmt/omarchy-topside-outpost-theme)
+[Topside Outpost](https://github.com/Gleasonmt/omarchy-topside-outpost-theme) ·
+[Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme)
 
 ## Lite themes
 
@@ -59,6 +62,21 @@ Add `live/<name>.frag.qsb` next to `backgrounds/<name>.png`: a Qt 6 fragment sha
 `detail` in the standard `qt_Matrix`/`qt_Opacity` block, plus `live/<name>.json`
 `{"still": <seconds>, "details": [[x0, y0, x1, y1], ...]}` listing the patches that
 move in Lite. The themes above include their shader source in `src/`.
+
+A scene can also be built from pictures and video, all from the theme's `live/`
+folder, by adding to `live/<name>.json`:
+
+| key | |
+|---|---|
+| `"painted": true` | the shader samples a picture as `source` (binding 1): `backgrounds/<name>.png` |
+| `"plate": "<file>"` | ...or this picture instead, e.g. a copy with what the shader draws itself painted out |
+| `"layers": ["a.png", ...]` | up to four more pictures, sampled as `layer1`..`layer4` (bindings 2-5): parallax layers, or parts drawn on top |
+| `"video": "<file>"` | a looping video, sampled as `video` (binding 6) in full motion; paused whenever the animation is. In Lite the shader should use a picture instead |
+| `"videoSize": [w, h]` | the size of the texture the video is drawn into (default `[1048, 414]`) |
+
+Video uses Qt Multimedia (`qt6-multimedia`), which Omarchy installs.
+[Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme)
+is an example: four layers and a green-screen character packed as colour and mask side by side.
 
 ## License
 
