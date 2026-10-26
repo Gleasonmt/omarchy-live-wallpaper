@@ -79,7 +79,8 @@ Item {
   readonly property real renderScale: Math.min(1, Math.max(.25, Number(followTheme && themeLive.renderScale !== undefined
     ? themeLive.renderScale : setting(onBattery ? "batteryRenderScale" : "renderScale", onBattery ? .5 : 1)) || .5))
   readonly property bool live: shader !== "" && mode !== "still"
-  property var activeScreens: ({})   // screen name -> true while it's showing and animating
+  property var activeScreens: ({})   // screen key -> true while it's showing and animating
+  property int screenCount: 0        // numbers each screen's scope, for its key above
   readonly property bool anyActive: Object.keys(activeScreens).some(function(k) { return activeScreens[k] })
 
   // Which shader goes with the current background, if any.
@@ -192,11 +193,13 @@ Item {
     }
   }
 
-  // Window events refresh Hyprland's client list (positions, fullscreen).
+  // Window events refresh Hyprland's client list (positions, fullscreen),
+  // and screen changes its monitor list (sizes, for the check below).
   Connections {
     target: Hyprland
     function onRawEvent(event) {
       if (/window|workspace|fullscreen|move|monitor/.test(event.name)) Hyprland.refreshToplevels()
+      if (/monitor/.test(event.name)) Hyprland.refreshMonitors()
     }
   }
 
@@ -221,7 +224,10 @@ Item {
         var mon = monitor, ws = mon && mon.activeWorkspace
         if (!ws) { covered = false; return }
         var m = mon.lastIpcObject || {}
-        var area = (m.width || 1) / (m.scale || 1) * (m.height || 1) / (m.scale || 1)
+        // A screen that just came back (lid, dock) has no size yet: fetch it
+        // rather than count every window as covering a 1x1 screen.
+        if (!m.width || !m.height) { Hyprland.refreshMonitors(); covered = false; return }
+        var area = m.width / (m.scale || 1) * m.height / (m.scale || 1)
         var list = Hyprland.toplevels.values
         var hidden = false
         for (var i = 0; i < list.length; i++) {
@@ -234,9 +240,23 @@ Item {
       Timer { interval: 1000; running: screenScope.ready && root.live; repeat: true; onTriggered: screenScope.checkCovered() }
 
       readonly property bool animating: ready && root.live && !covered
-      onAnimatingChanged: {
+      // Each scope has its own key, not just the screen's name: when a screen
+      // comes back (lid, dock) the old scope for that name can still report
+      // "not animating" after the new one said it is, which stopped the clock
+      // for good.
+      property string activeKey: ""
+      Component.onCompleted: activeKey = modelData.name + "#" + (++root.screenCount)
+      function report() {
+        if (!activeKey) return
         var a = Object.assign({}, root.activeScreens)
-        a[modelData.name] = animating
+        a[activeKey] = animating
+        root.activeScreens = a
+      }
+      onAnimatingChanged: report()
+      onActiveKeyChanged: report()
+      Component.onDestruction: {
+        var a = Object.assign({}, root.activeScreens)
+        delete a[activeKey]
         root.activeScreens = a
       }
 
