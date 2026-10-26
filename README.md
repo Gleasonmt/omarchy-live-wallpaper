@@ -42,8 +42,8 @@ least power. A theme's `live/mode.json` says which it is: `{"mode": "full"}` or
 | `batteryMode` | `theme` | on battery |
 | `fps` | `30` | plugged in; `0` holds a still frame |
 | `batteryFps` | `10` | on battery |
-| `renderScale` | `1` | when a mode is set here: share of screen resolution full motion draws at |
-| `batteryRenderScale` | `0.5` | on battery, likewise |
+| `renderScale` | the theme's, else `1` | plugged in: share of screen resolution full motion draws at (`0.5` is far lighter) |
+| `batteryRenderScale` | `0.5` | on battery, likewise (whatever the theme says) |
 
 Everything pauses while a fullscreen or near-fullscreen window covers the screen.
 Measured on an Intel Iris Xe laptop on battery: full motion about +0.5 W at 10 fps

@@ -76,8 +76,12 @@ Item {
     return ["full", "details", "still"].indexOf(m) !== -1 ? m : "full"
   }
   readonly property int fps: Math.max(0, Math.min(60, Number(setting(onBattery ? "batteryFps" : "fps", onBattery ? 10 : 30)) || 0))
-  readonly property real renderScale: Math.min(1, Math.max(.25, Number(followTheme && themeLive.renderScale !== undefined
-    ? themeLive.renderScale : setting(onBattery ? "batteryRenderScale" : "renderScale", onBattery ? .5 : 1)) || .5))
+  // How sharp to draw: on battery "batteryRenderScale" (half by default);
+  // plugged in, your "renderScale" if you set one, else the theme's, else full.
+  // (The theme's used to win over both, so battery ran at full resolution.)
+  readonly property real renderScale: Math.min(1, Math.max(.25, Number(onBattery
+    ? setting("batteryRenderScale", .5)
+    : setting("renderScale", themeLive.renderScale !== undefined ? themeLive.renderScale : 1)) || .5))
   readonly property bool live: shader !== "" && mode !== "still"
   property var activeScreens: ({})   // screen key -> true while it's showing and animating
   property int screenCount: 0        // numbers each screen's scope, for its key above
