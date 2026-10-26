@@ -300,18 +300,29 @@ Item {
           Image { id: fullL2; visible: false; source: root.layerUrl(1); asynchronous: true; smooth: true }
           Image { id: fullL3; visible: false; source: root.layerUrl(2); asynchronous: true; smooth: true }
           Image { id: fullL4; visible: false; source: root.layerUrl(3); asynchronous: true; smooth: true }
-          MediaPlayer {
-            id: player
-            source: root.videoUrl && root.mode === "full" ? root.videoUrl : ""
-            loops: MediaPlayer.Infinite
-            videoOutput: videoOut
-            readonly property bool wanted: source != "" && screenScope.animating && root.fps > 0
-            onWantedChanged: wanted ? play() : pause()
-            onSourceChanged: if (wanted) play()
-          }
-          VideoOutput { id: videoOut; width: root.videoSize[0]; height: root.videoSize[1]; fillMode: VideoOutput.Stretch }
-          ShaderEffectSource { id: videoTexture; sourceItem: videoOut; hideSource: true; live: true; visible: false }
           Image { id: fullPainting; visible: false; source: root.paintingUrl; asynchronous: true; smooth: true; mipmap: true }
+        }
+
+        // The video sits outside the scene's layer, and the shader picks up its
+        // newest frame only on the clock's tick: inside, each video frame
+        // (24 a second) redrew the whole scene on top of the clock's own
+        // redraws, which weren't in step with them, so the scene was drawn
+        // up to ~54 times a second whatever the fps setting.
+        MediaPlayer {
+          id: player
+          source: root.videoUrl && root.mode === "full" ? root.videoUrl : ""
+          loops: MediaPlayer.Infinite
+          videoOutput: videoOut
+          readonly property bool wanted: source != "" && screenScope.animating && root.fps > 0
+          onWantedChanged: wanted ? play() : pause()
+          onSourceChanged: if (wanted) play()
+        }
+        VideoOutput { id: videoOut; width: root.videoSize[0]; height: root.videoSize[1]; fillMode: VideoOutput.Stretch }
+        ShaderEffectSource { id: videoTexture; sourceItem: videoOut; hideSource: true; live: false; visible: false }
+        Connections {
+          target: root
+          enabled: player.wanted
+          function onTimeChanged() { videoTexture.scheduleUpdate() }
         }
       }
 
