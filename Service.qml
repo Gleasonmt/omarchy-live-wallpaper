@@ -130,6 +130,18 @@ Item {
   }
   Timer { interval: 20000; running: true; repeat: true; onTriggered: root.refresh() }
 
+  // While a live wallpaper shows, picking another background has to take it
+  // away at once, but the replaced link above is noticed late. So watch the
+  // link's folder (inotifywait, or a check a second without it) and report
+  // when the link points somewhere new. Each wait is bounded, so nothing
+  // outlives this process for long.
+  Process {
+    id: linkWatch
+    running: root.shader !== ""
+    command: ["bash", "-c", "d=${1%/*}; last=$(readlink \"$1\"); while :; do if command -v inotifywait >/dev/null; then inotifywait -qq -t 30 -e create,moved_to,delete \"$d\" || true; else sleep 1; fi; now=$(readlink \"$1\"); if [[ $now != \"$last\" ]]; then last=$now; echo changed; fi; done", "_", root.backgroundLink]
+    stdout: SplitParser { onRead: root.refresh() }
+  }
+
   FileView {
     path: root.home + "/.config/omarchy/live-wallpaper.json"
     watchChanges: true
