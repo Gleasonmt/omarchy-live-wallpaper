@@ -78,6 +78,31 @@ Video uses Qt Multimedia (`qt6-multimedia`), which Omarchy installs.
 [Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme)
 is an example: four layers and a green-screen character packed as colour and mask side by side.
 
+## Dependencies
+
+All installed by Omarchy: Qt 6 with Qt Multimedia (`qt6-multimedia`, for video
+scenes), ImageMagick (`magick`, for the LITE badge on Lite previews) and,
+optionally, `inotify-tools` (`inotifywait`, to notice a wallpaper change at once
+instead of within a second).
+
+## Removing
+
+```bash
+omarchy plugin remove gleasonmt.live-wallpaper
+```
+
+That stops the animation and Omarchy's still wallpaper shows again. To also
+delete the Lite themes the plugin made (only folders carrying its marker), the
+settings file and the optional extras:
+
+```bash
+for d in ~/.config/omarchy/themes/*-lite; do [[ -e $d/.made-by-live-wallpaper ]] && rm -rf "$d"; done
+rm -f ~/.config/omarchy/live-wallpaper.json ~/.local/bin/live-wallpaper
+```
+
+and remove the Live Wallpaper entries from
+`~/.config/omarchy/extensions/omarchy-menu.jsonc` if you added them.
+
 ## License
 
 [MIT](LICENSE)
