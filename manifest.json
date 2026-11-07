@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "gleasonmt.live-wallpaper",
   "name": "Live wallpaper",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "author": "Gleasonmt",
-  "description": "Animates a theme's wallpaper when the theme ships a live shader for it (<theme>/live/<name>.frag.qsb)",
+  "description": "Animated backgrounds that go with any theme (live background packs, or a theme with <theme>/live/<name>.frag.qsb)",
   "kinds": [
     "service"
   ],
