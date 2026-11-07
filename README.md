@@ -75,10 +75,13 @@ and paste the entries from `extras/omarchy-menu.jsonc` into
 ## Making a live background
 
 In a pack (or a theme), add `live/<name>.frag.qsb` next to `backgrounds/<name>.png`: a Qt 6 fragment shader
-(compile with `qsb --qt6`) with uniforms `time`, `resolution`, `viewport` and
+(compile with `qsb --glsl "300 es,120,150" --hlsl 50 --msl 12`, not `--qt6`: its GLSL
+100 es variant is what Qt picks when the shell runs on OpenGL ES, and NVIDIA rejects it,
+so the scene stays still) with uniforms `time`, `resolution`, `viewport` and
 `detail` in the standard `qt_Matrix`/`qt_Opacity` block, plus `live/<name>.json`
 `{"still": <seconds>, "details": [[x0, y0, x1, y1], ...]}` listing the patches that
-move in details mode. The backgrounds above include their shader source in `src/`.
+move in details mode. The backgrounds above include their shader source in `src/`, a `tools/build.sh`, and a
+`tools/check.sh` that CI runs to make sure the shader compiles for every GPU.
 
 A scene can also be built from pictures and video, all from the pack's `live/`
 folder, by adding to `live/<name>.json`:
