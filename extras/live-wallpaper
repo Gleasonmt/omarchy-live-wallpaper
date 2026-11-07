@@ -5,12 +5,21 @@
 #   live-wallpaper battery-mode <theme|full|details|still>  # on battery
 #   live-wallpaper fps <n> | battery-fps <n>          # frames per second (0 = hold still)
 #   live-wallpaper sharp <on|off> [--battery]         # Full mode at full resolution, or half
+#   live-wallpaper install <https git url>            # add a live background pack (all themes)
+#   live-wallpaper list | update | remove <pack>      # the packs you have
 # theme (default): as the theme says ("Topside" moves fully, "Topside Lite"
 # only in details). full: the whole scene moves. details: the still stays and
 # only small parts move (lights, cloth, beams), which costs less battery.
 # still: no animation.
 set -euo pipefail
 SETTINGS="$HOME/.config/omarchy/live-wallpaper.json"
+PACKS="$HOME/.config/omarchy/live-backgrounds"
+PLUGIN="$HOME/.config/omarchy/plugins/gleasonmt.live-wallpaper"
+relink() { [[ -f $PLUGIN/link-backgrounds.sh ]] && bash "$PLUGIN/link-backgrounds.sh" || echo "live-wallpaper plugin not found: the backgrounds will show up once it runs" >&2; }
+pack_name() {  # omarchy-topside-theme(.git) -> topside
+  local n=${1%/}; n=${n##*/}; n=${n%.git}; n=${n#omarchy-}; n=${n%-theme}; n=${n%-background}; n=${n%-backgrounds}
+  echo "$n"
+}
 
 [[ -s $SETTINGS ]] || echo '{}' >"$SETTINGS"
 set_key() {  # set_key <key> <json value>
@@ -35,6 +44,24 @@ case "${1:-}" in
     key=renderScale; [[ ${3:-} == --battery ]] && key=batteryRenderScale
     set_key "$key" "$([[ $2 == on ]] && echo 1 || echo 0.5)" ;;
   get) jq -r --arg k "${2:-}" --arg d "${3:-}" '.[$k] // $d' "$SETTINGS" ;;
+  install)
+    url=${2:-}
+    [[ $url =~ ^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]+$ ]] || { echo "install takes an https git URL" >&2; exit 1; }
+    name=$(pack_name "$url")
+    [[ $name =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || { echo "can't name a pack from $url" >&2; exit 1; }
+    [[ -e $PACKS/$name ]] && { echo "$name is already installed (live-wallpaper update)" >&2; exit 1; }
+    mkdir -p "$PACKS"
+    git clone --quiet --depth 1 -- "$url" "$PACKS/$name"
+    relink; echo "installed $name: pick it in Omarchy menu > Style > Background" ;;
+  update)
+    for d in "$PACKS"/*/; do [[ -d $d/.git ]] && { echo "${d%/}" | sed 's|.*/||'; git -C "$d" pull --quiet --ff-only || true; }; done
+    relink ;;
+  remove)
+    name=${2:-}
+    [[ $name =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && -d $PACKS/$name ]] || { echo "no pack named '${name}' (live-wallpaper list)" >&2; exit 1; }
+    rm -rf -- "${PACKS:?}/$name"
+    relink; echo "removed $name" ;;
+  list) for d in "$PACKS"/*/; do [[ -d $d ]] && echo "$(basename "$d"): $(cd "$d/backgrounds" 2>/dev/null && ls | tr '\n' ' ')"; done; true ;;
   -h|--help|help) sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo "unknown command: $1 (try live-wallpaper --help)" >&2; exit 1 ;;
 esac

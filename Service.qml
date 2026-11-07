@@ -6,8 +6,10 @@ import Quickshell.Hyprland
 import Quickshell.Services.UPower
 import QtMultimedia
 
-// Live wallpapers. When the current background is <theme>/backgrounds/<name>.*
-// and the theme has <theme>/live/<name>.frag.qsb, that shader animates it.
+// Live wallpapers. When the current background is <dir>/backgrounds/<name>.*
+// and <dir>/live/<name>.frag.qsb exists, that shader animates it. <dir> is a
+// live background pack in ~/.config/omarchy/live-backgrounds/ (offered under
+// every theme, see link-backgrounds.sh), or a theme that ships its own.
 // Omarchy's still background is a frame of the same scene. Three modes:
 //   full     the whole scene moves (drawn at reduced resolution)
 //   details  the still stays; only the small patches listed in
@@ -126,7 +128,7 @@ Item {
     path: root.home + "/.local/state/omarchy/current/theme.name"
     watchChanges: true
     printErrors: false
-    onFileChanged: { reload(); root.refresh() }
+    onFileChanged: { reload(); root.refresh(); root.linkBackgrounds() }
   }
   Timer { interval: 20000; running: true; repeat: true; onTriggered: root.refresh() }
 
@@ -193,7 +195,18 @@ Item {
     command: ["bash", String(Qt.resolvedUrl("make-lite.sh")).replace(/^file:\/\//, "")]
     running: true
   }
-  Timer { interval: 600000; running: true; repeat: true; onTriggered: if (!makeLite.running) makeLite.running = true }
+  Timer { interval: 600000; running: true; repeat: true; onTriggered: { if (!makeLite.running) makeLite.running = true; root.linkBackgrounds() } }
+
+  // Live backgrounds (packs in ~/.config/omarchy/live-backgrounds/) offered
+  // under every theme by link-backgrounds.sh next to this file: at startup,
+  // on every theme switch (so a newly installed theme gets them at once) and
+  // with the Lite check above.
+  Process {
+    id: linker
+    command: ["bash", String(Qt.resolvedUrl("link-backgrounds.sh")).replace(/^file:\/\//, "")]
+    running: true
+  }
+  function linkBackgrounds() { if (!linker.running) linker.running = true }
 
   // The clock. Wrapped every two hours to keep float maths precise.
   Timer {
