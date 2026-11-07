@@ -15,7 +15,7 @@ A live background is a small pack in `~/.config/omarchy/live-backgrounds/<pack>/
 Install one by cloning it there:
 
 ```bash
-git clone --depth 1 https://github.com/Gleasonmt/omarchy-topside-theme ~/.config/omarchy/live-backgrounds/topside && omarchy restart shell
+git clone --depth 1 https://github.com/Gleasonmt/omarchy-topside-background ~/.config/omarchy/live-backgrounds/topside && omarchy restart shell
 ```
 
 (or `live-wallpaper install <url>` with the optional command below). The plugin links
@@ -28,18 +28,18 @@ Remove a pack by deleting its folder (`live-wallpaper remove <pack>`); its links
 | | |
 |---|---|
 | ![Light Grid](media/light-grid.webp) | ![Light Grid Towers](media/light-grid-towers.webp) |
-| [**Light Grid**](https://github.com/Gleasonmt/omarchy-light-grid-theme) | [**Light Grid Towers**](https://github.com/Gleasonmt/omarchy-light-grid-towers-theme) |
+| [**Light Grid**](https://github.com/Gleasonmt/omarchy-light-grid-background) | [**Light Grid Towers**](https://github.com/Gleasonmt/omarchy-light-grid-towers-background) |
 | ![Topside](media/topside.webp) | ![Topside Outpost](media/topside-outpost.webp) |
-| [**Topside**](https://github.com/Gleasonmt/omarchy-topside-theme) | [**Topside Outpost**](https://github.com/Gleasonmt/omarchy-topside-outpost-theme) |
+| [**Topside**](https://github.com/Gleasonmt/omarchy-topside-background) | [**Topside Outpost**](https://github.com/Gleasonmt/omarchy-topside-outpost-background) |
 | ![Topside Mountain View](media/topside-mountain-view.webp) | |
-| [**Topside Mountain View**](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme) | |
+| [**Topside Mountain View**](https://github.com/Gleasonmt/omarchy-topside-mountain-view-background) | |
 
 Backgrounds made for it:
-[Light Grid](https://github.com/Gleasonmt/omarchy-light-grid-theme) ·
-[Light Grid Towers](https://github.com/Gleasonmt/omarchy-light-grid-towers-theme) ·
-[Topside](https://github.com/Gleasonmt/omarchy-topside-theme) ·
-[Topside Outpost](https://github.com/Gleasonmt/omarchy-topside-outpost-theme) ·
-[Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme)
+[Light Grid](https://github.com/Gleasonmt/omarchy-light-grid-background) ·
+[Light Grid Towers](https://github.com/Gleasonmt/omarchy-light-grid-towers-background) ·
+[Topside](https://github.com/Gleasonmt/omarchy-topside-background) ·
+[Topside Outpost](https://github.com/Gleasonmt/omarchy-topside-outpost-background) ·
+[Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-background)
 
 ## Lite themes
 
@@ -92,7 +92,7 @@ folder, by adding to `live/<name>.json`:
 | `"videoSize": [w, h]` | the size of the texture the video is drawn into (default `[1048, 414]`) |
 
 Video uses Qt Multimedia (`qt6-multimedia`), which Omarchy installs.
-[Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-theme)
+[Topside Mountain View](https://github.com/Gleasonmt/omarchy-topside-mountain-view-background)
 is an example: four layers and a green-screen character packed as colour and mask side by side.
 
 ## Dependencies
